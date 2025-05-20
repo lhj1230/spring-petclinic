@@ -8,11 +8,13 @@ pipeline {
     
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerCredential')
+        REGION = "ap-northeast-2"
+        AWS_CREDENTIALS_NAME = "AWSCredentials"
     }
     
-    stages {
+     stages {
         stage('Git Clone') {
-            steps{
+            steps {
                 echo 'Git Clone'
                 git url: 'https://github.com/lhj1230/spring-petclinic.git',
                     branch: 'main'
@@ -29,29 +31,42 @@ pipeline {
         // Maven build 작업
         stage('Maven Build') {
             steps {
-                echo 'Maven Build'
-                sh 'mvn -Dmaven.test.failure.ignore=true clean package'
-            }
+                echo 'Maven Build' 
+                sh 'mvn -Dmaven.test.failure.ignore=true clean package' // Test error 무시
+            }            
         }
-        stage('SSH Publish') {
+
+        // Docker Image 생성
+        stage('Docker Image Build') {
             steps {
-                echo 'SSH Publish'
-                sshPublisher(publishers: [sshPublisherDesc(configName: 'target', 
-                transfers: [sshTransfer(cleanRemote: false, excludes: '', 
-                execCommand: '''fuser -k 8080/tcp
-                export BUILD_ID=PetClinic
-                nohup java -jar spring-petclinic-3.4.0-SNAPSHOT.jar >> nohup.out 2>&1 &''', 
-                execTimeout: 120000, 
-                flatten: false, 
-                makeEmptyDirs: false, 
-                noDefaultExcludes: false, 
-                patternSeparator: '[, ]+', 
-                remoteDirectory: '', 
-                remoteDirectorySDF: false, 
-                removePrefix: '', sourceFiles: 'Maven')], 
-                usePromotionTimestamp: false, 
-                useWorkspaceInPromotion: false, verbose: false)])
+                echo 'Docker Image Build'
+                dir("${env.WORKSPACE}") {
+                   sh '''
+                      docker build -t spring-petclinic:$BUILD_NUMBER .
+                      docker tag spring-petclinic:$BUILD_NUMBER lhj1230/spring-petclinic:latest
+                      '''
+                }
             }
         }
+
+        // Docker Image Push
+        stage('Docker Image Push') {
+            steps { 
+                sh '''
+                echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
+                docker push lhj1230/spring-petclinic:latest
+                '''
+            }
+        }
+
+        // Remove Docker Image
+        stage('Remove Docker Image') {
+            steps {
+                sh '''
+                docker rmi spring-petclinic:$BUILD_NUMBER
+                docker rmi lhj1230/spring-petclinic:latest
+                '''
+            }
+        }        
     }
 }
