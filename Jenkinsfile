@@ -1,18 +1,18 @@
 pipeline {
     agent any
-    
+
     tools {
         maven "M3"
         jdk "JDK21"
     }
-    
+
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerCredential')
         REGION = "ap-northeast-2"
         AWS_CREDENTIALS_NAME = "AWSCredentials"
     }
-    
-     stages {
+
+    stages {
         stage('Git Clone') {
             steps {
                 echo 'Git Clone'
@@ -31,9 +31,9 @@ pipeline {
         // Maven build 작업
         stage('Maven Build') {
             steps {
-                echo 'Maven Build' 
+                echo 'Maven Build'
                 sh 'mvn -Dmaven.test.failure.ignore=true clean package' // Test error 무시
-            }            
+            }
         }
 
         // Docker Image 생성
@@ -41,20 +41,20 @@ pipeline {
             steps {
                 echo 'Docker Image Build'
                 dir("${env.WORKSPACE}") {
-                   sh '''
-                      docker build -t spring-petclinic:$BUILD_NUMBER .
-                      docker tag spring-petclinic:$BUILD_NUMBER lhj1230/spring-petclinic:latest
-                      '''
+                    sh '''
+                        docker build -t spring-petclinic:$BUILD_NUMBER .
+                        docker tag spring-petclinic:$BUILD_NUMBER lhj1230/spring-petclinic:latest
+                    '''
                 }
             }
         }
 
         // Docker Image Push
         stage('Docker Image Push') {
-            steps { 
+            steps {
                 sh '''
-                echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
-                docker push lhj1230/spring-petclinic:latest
+                    echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
+                    docker push lhj1230/spring-petclinic:latest
                 '''
             }
         }
@@ -63,10 +63,39 @@ pipeline {
         stage('Remove Docker Image') {
             steps {
                 sh '''
-                docker rmi spring-petclinic:$BUILD_NUMBER
-                docker rmi lhj1230/spring-petclinic:latest
+                    docker rmi spring-petclinic:$BUILD_NUMBER
+                    docker rmi lhj1230/spring-petclinic:latest
                 '''
             }
-        }        
+        }
+
+        stage('Upload S3') {
+            steps {
+                echo "Upload to S3"
+                dir("${env.WORKSPACE}") {
+                    sh 'zip -r scripts.zip ./scripts appspec.yml'
+                    withAWS(region: "${REGION}", credentials: "${AWS_CREDENTIALS_NAME}") {
+                        s3Upload(file: "scripts.zip", bucket: "team2-codedeploy-bucket")
+                    }
+                    sh 'rm -rf ./scripts.zip'
+                }
+            }
+        }
+
+        stage('Codedeploy Workload') {
+            steps {
+                echo "Codedeploy Workload"
+                withAWS(region: "${REGION}", credentials: "${AWS_CREDENTIALS_NAME}") {
+                    sh '''
+                        aws deploy create-deployment --application-name TEAM2_deploy \
+                        --deployment-config-name CodeDeployDefault.OneAtATime \
+                        --deployment-group-name TEAM2_deploy_group \
+                        --ignore-application-stop-failures \
+                        --s3-location bucket=team2-codedeploy-bucket,bundleType=zip,key=scripts.zip
+                    '''
+                }
+                sleep(10) // sleep 10s
+            }
+        }
     }
 }
