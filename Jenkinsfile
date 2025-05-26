@@ -17,7 +17,7 @@ pipeline {
             steps {
                 echo 'Git Clone'
                 git url: 'https://github.com/lhj1230/spring-petclinic.git',
-                    branch: 'main'
+                    branch: 'main', credentialsId: 'githubCredentials'
             }
             post {
                 success {
@@ -33,6 +33,14 @@ pipeline {
             steps {
                 echo 'Maven Build'
                 sh 'mvn -Dmaven.test.failure.ignore=true clean package' // Test error 무시
+            }
+            post {
+                success {
+                    echo 'Build Success'
+                }
+                failure {
+                    echo 'Build Fail'
+                }
             }
         }
 
