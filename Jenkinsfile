@@ -6,6 +6,10 @@ pipeline {
         jdk "JDK21"
     }
 
+    triggers {
+        githubPush()
+    }
+
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerCredential')
         REGION = "ap-northeast-2"
