@@ -9,7 +9,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerCredential')
         REGION = "ap-northeast-2"
-        AWS_CREDENTIALS_NAME = "AWSCredentials"
+        AWS_CREDENTIALS_NAME = "aws-project5"
     }
 
     stages {
@@ -83,7 +83,7 @@ pipeline {
                 dir("${env.WORKSPACE}") {
                     sh 'zip -r scripts.zip ./scripts appspec.yml'
                     withAWS(region: "${REGION}", credentials: "${AWS_CREDENTIALS_NAME}") {
-                        s3Upload(file: "scripts.zip", bucket: "team2-codedeploy-bucket")
+                        s3Upload(file: "scripts.zip", bucket: "team5-codedeploy-bucket")
                     }
                     sh 'rm -rf ./scripts.zip'
                 }
@@ -95,11 +95,11 @@ pipeline {
                 echo "Codedeploy Workload"
                 withAWS(region: "${REGION}", credentials: "${AWS_CREDENTIALS_NAME}") {
                     sh '''
-                        aws deploy create-deployment --application-name TEAM2_deploy \
+                        aws deploy create-deployment --application-name TEAM5_deploy \
                         --deployment-config-name CodeDeployDefault.OneAtATime \
-                        --deployment-group-name TEAM2_deploy_group \
+                        --deployment-group-name TEAM5_deploy_group \
                         --ignore-application-stop-failures \
-                        --s3-location bucket=team2-codedeploy-bucket,bundleType=zip,key=scripts.zip
+                        --s3-location bucket=team5-codedeploy-bucket,bundleType=zip,key=scripts.zip
                     '''
                 }
                 sleep(10) // sleep 10s
