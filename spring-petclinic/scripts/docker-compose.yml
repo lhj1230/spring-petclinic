@@ -1,0 +1,7 @@
+version: '3.9'
+services:
+  spring-petclinic:
+    image: lhj1230/spring-petclinic
+    ports:
+      - "80:8080"
+      
