@@ -17,7 +17,7 @@ pipeline {
             steps {
                 echo 'Git Clone'
                 git url: 'https://github.com/lhj1230/spring-petclinic.git',
-                    branch: 'main', credentialsId: 'dockerCredential'
+                    branch: 'main', credentialsId: 'git_classic_token'
             }
             post {
                 success {
