@@ -98,7 +98,10 @@ pipeline {
 
         stage('Codedeploy Workload') {
             steps {
-               echo "create Codedeploy group"   
+               echo "create Codedeploy group" 
+
+               script {
+                   withAWS(region: "ap-northeast-2", credentials: "${AWS_CREDENTIALS_NAME}") {
                 sh '''
                     aws deploy create-deployment-group \
                     --application-name TEAM5_deploy \
@@ -107,15 +110,17 @@ pipeline {
                     --deployment-config-name CodeDeployDefault.OneAtATime \
                     --service-role-arn arn:aws:iam::491085389788:role/project5-code-deploy-service-role
                     '''
-                echo "Codedeploy Workload"   
+                steps.echo "Codedeploy Workload"   
                 sh '''
                     aws deploy create-deployment --application-name TEAM5_deploy \
                     --deployment-config-name CodeDeployDefault.OneAtATime \
                     --deployment-group-name TEAM5_deploy_group-${BUILD_NUMBER} \
                     --s3-location bucket=project5-bucket-jks,bundleType=zip,key=scripts.zip
                     '''
-                    sleep(10) // sleep 10s
+                 
             }
         }
+
+        sleep(10) 
     }
 }
