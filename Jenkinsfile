@@ -17,7 +17,7 @@ pipeline {
             steps {
                 echo 'Git Clone'
                 git url: 'https://github.com/lhj1230/spring-petclinic.git',
-                    branch: 'main', credentialsId: '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'
+                    branch: 'main', credentialsId: 'dockerCredential'
             }
             post {
                 success {
@@ -60,10 +60,11 @@ pipeline {
         // Docker Image Push
         stage('Docker Image Push') {
             steps {
-                sh '''
-                    echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
-                    docker push lhj1230/spring-petclinic:latest
-                '''
+                withCredentials([usernamePassword(credentialsId: 'dockerCredential', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push lhj1230/spring-petclinic:latest
+                    '''
             }
         }
 
