@@ -69,7 +69,8 @@ pipeline {
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
                         docker push lhj1230/spring-petclinic:latest
                     '''
-            }
+                }
+            }     
         }
 
         // Remove Docker Image
