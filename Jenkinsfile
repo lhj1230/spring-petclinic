@@ -98,17 +98,23 @@ pipeline {
 
         stage('Codedeploy Workload') {
             steps {
-                echo "Codedeploy Workload"
-                withAWS(region: "${REGION}", credentials: "${AWS_CREDENTIALS_NAME}") {
-                    sh '''
-                        aws deploy create-deployment --application-name TEAM5_deploy \
-                        --deployment-config-name CodeDeployDefault.OneAtATime \
-                        --deployment-group-name TEAM5_deploy_group \
-                        --ignore-application-stop-failures \
-                        --s3-location bucket=project5-bucket-jks,bundleType=zip,key=scripts.zip
+               echo "create Codedeploy group"   
+                sh '''
+                    aws deploy create-deployment-group \
+                    --application-name TEAM5_deploy \
+                    --auto-scaling-groups project5-auto-group \
+                    --deployment-group-name TEAM5_deploy_group-${BUILD_NUMBER} \
+                    --deployment-config-name CodeDeployDefault.OneAtATime \
+                    --service-role-arn arn:aws:iam::491085389788:role/project5-code-deploy-service-role
                     '''
-                }
-                sleep(10) // sleep 10s
+                echo "Codedeploy Workload"   
+                sh '''
+                    aws deploy create-deployment --application-name TEAM5_deploy \
+                    --deployment-config-name CodeDeployDefault.OneAtATime \
+                    --deployment-group-name TEAM5_deploy_group-${BUILD_NUMBER} \
+                    --s3-location bucket=project5-bucket-jks,bundleType=zip,key=scripts.zip
+                    '''
+                    sleep(10) // sleep 10s
             }
         }
     }
