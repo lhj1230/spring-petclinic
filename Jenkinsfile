@@ -105,7 +105,7 @@ pipeline {
                         --deployment-config-name CodeDeployDefault.OneAtATime \
                         --deployment-group-name TEAM5_deploy_group \
                         --ignore-application-stop-failures \
-                        --s3-location bucket=team5-codedeploy-bucket,bundleType=zip,key=scripts.zip
+                        --s3-location bucket=project5-bucket-jks,bundleType=zip,key=scripts.zip
                     '''
                 }
                 sleep(10) // sleep 10s
