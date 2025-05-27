@@ -117,10 +117,9 @@ pipeline {
                     --deployment-group-name TEAM5_deploy_group-${BUILD_NUMBER} \
                     --s3-location bucket=project5-bucket-jks,bundleType=zip,key=scripts.zip
                     '''
-                 
-            }
-        }
+                   }
+               }
 
-        sleep(10) 
-    }
-}
+            sleep(10) 
+       }
+   }
