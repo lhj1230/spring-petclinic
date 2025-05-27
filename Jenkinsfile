@@ -55,7 +55,7 @@ pipeline {
                 dir("${env.WORKSPACE}") {
                     sh '''
                         docker build -t spring-petclinic:$BUILD_NUMBER .
-                        docker tag spring-petclinic:$BUILD_NUMBER lhj1230/spring-petclinic:latest
+                        docker tag spring-petclinic:$BUILD_NUMBER mightyi/spring-petclinic:latest
                     '''
                 }
             }
@@ -67,7 +67,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'dockerCredential', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh '''
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push lhj1230/spring-petclinic:latest
+                        docker push mightyi/spring-petclinic:latest
                     '''
                 }
             }     
