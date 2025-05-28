@@ -1,5 +1,5 @@
 #!/bin/bash
 
-
+export PATH=$PATH:/home/ubuntu/.docker/cli-plugins
 cd /home/ubuntu/scripts
-/home/ubuntu/.docker/cli-plugins/docker-compose up -d --build
+docker-compose up -d --build
