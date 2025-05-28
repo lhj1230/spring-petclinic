@@ -104,17 +104,17 @@ pipeline {
                    withAWS(region: "ap-northeast-2", credentials: "${AWS_CREDENTIALS_NAME}") {
                 sh '''
                     aws deploy create-deployment-group \
-                    --application-name TEAM5_deploy \
+                    --application-name project5-application \
                     --auto-scaling-groups project5-auto-group \
-                    --deployment-group-name TEAM5_deploy_group-${BUILD_NUMBER} \
+                    --deployment-group-name project5-production-in_place-${BUILD_NUMBER} \
                     --deployment-config-name CodeDeployDefault.OneAtATime \
                     --service-role-arn arn:aws:iam::491085389788:role/project5-code-deploy-service-role
                     '''
                 steps.echo "Codedeploy Workload"   
                 sh '''
-                    aws deploy create-deployment --application-name TEAM5_deploy \
+                    aws deploy create-deployment --application-name project5-application \
                     --deployment-config-name CodeDeployDefault.OneAtATime \
-                    --deployment-group-name TEAM5_deploy_group-${BUILD_NUMBER} \
+                    --deployment-group-name project5-production-in_place-${BUILD_NUMBER} \
                     --s3-location bucket=project5-bucket-jks,bundleType=zip,key=scripts.zip
                     '''
                    }
