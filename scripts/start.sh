@@ -1,5 +1,6 @@
 #!/bin/bash
 
-docker compose down
+cd /home/ubuntu
 
+docker compose down
 docker compose up -d --build
