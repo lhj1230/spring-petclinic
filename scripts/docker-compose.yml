@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        JAR_PATH: spring-petclinic-3.4.0-SNAPSHOT.jar  # 반드시 정확히 명시
+        JAR_PATH: target/spring-petclinic-3.4.0-SNAPSHOT.jar  # 반드시 정확히 명시
     ports:
       - "80:8080"
     container_name: spring-petclinic
