@@ -1,5 +1,8 @@
-FROM openjdk:17-oracle 
-ARG JAR_PATH=target/*.jar
-COPY ${JAR_PATH} spring-petclinic.jar
-EXPOSE 8080
-CMD ["java", "-jar", "spring-petclinic.jar"]
+FROM jenkins/jenkins:lts
+
+USER root
+
+RUN curl -LO "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl" && \
+    chmod +x kubectl && mv kubectl /usr/local/bin/kubectl
+
+USER jenkins
