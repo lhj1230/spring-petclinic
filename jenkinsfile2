@@ -1,0 +1,18 @@
+pipeline {
+    agent any
+
+    environment {
+        KUBECONFIG = "/var/jenkins_home/.kube/config"
+    }
+
+    stages {
+        stage('Deploy YAMLs') {
+            steps {
+                dir('k8s') {  // `db.yml`, `petclinic.yml`이 있는 디렉토리
+                    sh 'kubectl apply -f db.yml'
+                    sh 'kubectl apply -f petclinic.yml'
+                }
+            }
+        }
+    }
+}
