@@ -52,13 +52,13 @@ spec:
             httpGet:
               path: /readyz
               port: http
-          resources:                         # ✅ 여기에 리소스 추가
+          resources:                        
             requests:
-              memory: "512Mi"
+              memory: "768Mi"
               cpu: "250m"
             limits:
-              memory: "1Gi"
-              cpu: "500m"
+              memory: "1.5Gi"
+              cpu: "1"
           volumeMounts:
             - mountPath: /bindings/secret
               name: binding
