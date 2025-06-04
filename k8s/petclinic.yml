@@ -1,4 +1,4 @@
----
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -52,6 +52,13 @@ spec:
             httpGet:
               path: /readyz
               port: http
+          resources:                         # ✅ 여기에 리소스 추가
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
           volumeMounts:
             - mountPath: /bindings/secret
               name: binding
