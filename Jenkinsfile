@@ -6,11 +6,10 @@ pipeline {
         }
     }
     stages {
-        stage('Check') {
+        stage('Test') {
             steps {
-                sh 'echo Hello from Jenkins agent pod!'
+                sh 'echo Hello from Kubernetes agent'
             }
         }
     }
 }
-       
