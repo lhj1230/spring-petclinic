@@ -18,7 +18,6 @@ pipeline {
     stages {
         stage('Git Clone') {
             steps {
-                // 기존 spring-petclinic 디렉토리 제거 후 clone
                 sh '''
                     rm -rf spring-petclinic
                     git clone https://github.com/lhj1230/spring-petclinic.git
@@ -37,11 +36,18 @@ pipeline {
 
         stage('Deploy YAMLs') {
             steps {
-                dir('spring-petclinic/k8s') {  // `db.yml`, `petclinic.yml`이 있는 경로
+                dir('spring-petclinic/k8s') {
                     echo '🚀 Deploying YAMLs to Kubernetes'
                     sh 'kubectl apply -f db.yml'
                     sh 'kubectl apply -f petclinic.yml'
                 }
+            }
+        }
+
+        stage('Restart App') {
+            steps {
+                echo '🔄 Restarting Deployment'
+                sh 'kubectl rollout restart deployment petclinic'
             }
         }
     }
@@ -55,3 +61,4 @@ pipeline {
         }
     }
 }
+
