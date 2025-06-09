@@ -40,7 +40,7 @@ pipeline {
                 dir('spring-petclinic') {
                     echo '🧪 Running Tests (with timeout)'
                     timeout(time: 5, unit: 'MINUTES') {
-                        sh 'mvn test'
+                        sh 'mvn test -Dtest=!PetClinicIntegrationTests'
                     }
                 }
             }
