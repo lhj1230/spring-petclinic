@@ -17,7 +17,6 @@ pipeline {
     stages {
         stage('Git Clone') {
             steps {
-                sh 'rm -rf spring-petclinic' // 기존 디렉토리 제거 (중복 방지)
                 sh 'git clone https://github.com/lhj1230/spring-petclinic.git'
             }
         }
@@ -25,27 +24,19 @@ pipeline {
         stage('Maven Build') {
             steps {
                 dir('spring-petclinic') {
-                    echo 'Maven Build'
-                    sh 'mvn -Dmaven.test.failure.ignore=true clean package'
-                }
-            }
-            post {
-                success {
-                    echo 'Build Success'
-                }
-                failure {
-                    echo 'Build Fail'
+                    echo 'Maven Build (without test)'
+                    sh 'mvn clean compile package -DskipTests=true'
                 }
             }
         }
 
-        stage('Delete Existing K8s Resources') {
+        stage('Maven Test') {
             steps {
-                dir('spring-petclinic/k8s') {
-                    sh '''
-                        kubectl delete -f petclinic.yml --ignore-not-found
-                        kubectl delete -f db.yml --ignore-not-found
-                    '''
+                dir('spring-petclinic') {
+                    echo 'Running Tests (with timeout)'
+                    timeout(time: 5, unit: 'MINUTES') {
+                        sh 'mvn test'
+                    }
                 }
             }
         }
@@ -53,16 +44,18 @@ pipeline {
         stage('Deploy YAMLs') {
             steps {
                 dir('spring-petclinic/k8s') {
-                    sh 'kubectl apply -f db.yml'
-                    sh 'kubectl apply -f petclinic.yml'
+                    sh 'kubectl apply -f .'
                 }
             }
         }
+    }
 
-        stage('Check Pod Status') {
-            steps {
-                sh 'kubectl get pods -l app=spring-petclinic'
-            }
+    post {
+        success {
+            echo 'Pipeline Success'
+        }
+        failure {
+            echo 'Pipeline Failed'
         }
     }
 }
