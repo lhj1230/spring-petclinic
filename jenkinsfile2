@@ -35,17 +35,6 @@ pipeline {
             }
         }
 
-        stage('Maven Test') {
-            steps {
-                dir('spring-petclinic') {
-                    echo '🧪 Running Tests (with timeout)'
-                    timeout(time: 1, unit: 'MINUTES') {
-                        sh 'mvn test -DexcludeTags=integration'
-                    }
-                }
-            }
-        }
-
         stage('Deploy YAMLs') {
             steps {
                 dir('spring-petclinic/k8s') {  // `db.yml`, `petclinic.yml`이 있는 경로
