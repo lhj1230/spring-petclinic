@@ -17,6 +17,7 @@ pipeline {
     stages {
         stage('Git Clone') {
             steps {
+                sh 'rm -rf spring-petclinic' // 기존 디렉토리 제거 (중복 방지)
                 sh 'git clone https://github.com/lhj1230/spring-petclinic.git'
             }
         }
@@ -34,6 +35,17 @@ pipeline {
                 }
                 failure {
                     echo 'Build Fail'
+                }
+            }
+        }
+
+        stage('Delete Existing K8s Resources') {
+            steps {
+                dir('spring-petclinic/k8s') {
+                    sh '''
+                        kubectl delete -f petclinic.yml --ignore-not-found
+                        kubectl delete -f db.yml --ignore-not-found
+                    '''
                 }
             }
         }
