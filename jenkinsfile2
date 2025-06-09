@@ -18,14 +18,18 @@ pipeline {
     stages {
         stage('Git Clone') {
             steps {
-                sh 'git clone https://github.com/lhj1230/spring-petclinic.git'
+                // 기존 spring-petclinic 디렉토리 제거 후 clone
+                sh '''
+                    rm -rf spring-petclinic
+                    git clone https://github.com/lhj1230/spring-petclinic.git
+                '''
             }
         }
 
         stage('Maven Build') {
             steps {
                 dir('spring-petclinic') {
-                    echo 'Maven Build (without test)'
+                    echo '🔨 Maven Build (without test)'
                     sh 'mvn clean compile package -DskipTests=true'
                 }
             }
@@ -34,7 +38,7 @@ pipeline {
         stage('Maven Test') {
             steps {
                 dir('spring-petclinic') {
-                    echo 'Running Tests (with timeout)'
+                    echo '🧪 Running Tests (with timeout)'
                     timeout(time: 5, unit: 'MINUTES') {
                         sh 'mvn test'
                     }
@@ -44,8 +48,10 @@ pipeline {
 
         stage('Deploy YAMLs') {
             steps {
-                dir('spring-petclinic/k8s') {
-                    sh 'kubectl apply -f .'
+                dir('spring-petclinic/k8s') {  // `db.yml`, `petclinic.yml`이 있는 경로
+                    echo '🚀 Deploying YAMLs to Kubernetes'
+                    sh 'kubectl apply -f db.yml'
+                    sh 'kubectl apply -f petclinic.yml'
                 }
             }
         }
@@ -53,10 +59,10 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline Success'
+            echo '✅ Pipeline Success'
         }
         failure {
-            echo 'Pipeline Failed'
+            echo '❌ Pipeline Failed'
         }
     }
 }
