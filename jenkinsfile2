@@ -5,13 +5,51 @@ pipeline {
         KUBECONFIG = "/var/jenkins_home/.kube/config"
     }
 
+    tools {
+        maven "M3"
+        jdk "JDK21"
+    }
+
+    triggers {
+        githubPush()
+    }
+
     stages {
+        stage('Git Clone') {
+            steps {
+                sh 'git clone https://github.com/lhj1230/spring-petclinic.git'
+            }
+        }
+
+        stage('Maven Build') {
+            steps {
+                dir('spring-petclinic') {
+                    echo 'Maven Build'
+                    sh 'mvn -Dmaven.test.failure.ignore=true clean package'
+                }
+            }
+            post {
+                success {
+                    echo 'Build Success'
+                }
+                failure {
+                    echo 'Build Fail'
+                }
+            }
+        }
+
         stage('Deploy YAMLs') {
             steps {
-                dir('k8s') {  // `db.yml`, `petclinic.yml`이 있는 디렉토리
+                dir('spring-petclinic/k8s') {
                     sh 'kubectl apply -f db.yml'
                     sh 'kubectl apply -f petclinic.yml'
                 }
+            }
+        }
+
+        stage('Check Pod Status') {
+            steps {
+                sh 'kubectl get pods -l app=spring-petclinic'
             }
         }
     }
