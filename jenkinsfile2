@@ -28,7 +28,7 @@ pipeline {
         stage('Maven Build') {
             steps {
                 dir('spring-petclinic') {
-                    echo '🔨 Maven Build (without test)'
+                    echo 'Maven Build (without test)'
                     sh 'mvn clean compile package -DskipTests=true'
                 }
             }
@@ -37,7 +37,7 @@ pipeline {
         stage('Deploy YAMLs') {
             steps {
                 dir('spring-petclinic/k8s') {
-                    echo '🚀 Deploying YAMLs to Kubernetes'
+                    echo 'Deploying YAMLs to Kubernetes'
                     sh 'kubectl apply -f db.yml'
                     sh 'kubectl apply -f petclinic.yml'
                 }
@@ -46,7 +46,7 @@ pipeline {
 
         stage('Restart App') {
             steps {
-                echo '🔄 Restarting Deployment'
+                echo 'Restarting Deployment'
                 sh 'kubectl rollout restart deployment petclinic'
             }
         }
@@ -54,10 +54,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ Pipeline Success'
+            echo 'Pipeline Success'
         }
         failure {
-            echo '❌ Pipeline Failed'
+            echo 'Pipeline Failed'
         }
     }
 }
